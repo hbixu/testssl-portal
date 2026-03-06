@@ -113,7 +113,7 @@ All environment variables are **optional**. Set them only to override the defaul
 | `BRANDING_ICON_URL` | No | URL of the logo/icon (empty = default lock icon) | — |
 | `BRANDING_LINK` | No | URL when clicking the branding (empty = `/`) | — |
 | `DEFAULT_LOCALE` | No | Default UI language (`en`, `pt-PT`) | `en` |
-| `ENABLED_LOCALES` | No | Comma-separated list of enabled locales (e.g. `en,pt-PT` or `en`) | all available |
+| `ENABLED_LOCALES` | No | Restrict available locales (e.g. `en` or `en,pt-PT`) | all (empty) |
 
 ### Build Arguments
 
@@ -121,7 +121,7 @@ All environment variables are **optional**. Set them only to override the defaul
 |----------|-------------|---------|
 | `VERSION` | Image version tag | `1.0.0` |
 | `BUILD_DATE` | Build timestamp (ISO 8601) | auto-generated |
-| `BASEIMAGE_VERSION` | Debian base image tag | `bookworm-slim` |
+| `BASEIMAGE_VERSION` | Debian base image tag | `bookworm-20250224-slim` |
 | `TESTSSL_VERSION` | testssl.sh branch or tag to clone | `3.2` |
 
 ### Quick Start

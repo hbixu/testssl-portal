@@ -48,7 +48,7 @@ if _env_enabled:
 else:
     SUPPORTED_LOCALES = tuple(_AVAILABLE_LOCALES)
 
-_default = (os.environ.get("DEFAULT_LOCALE", "") or "pt-PT").strip()
+_default = (os.environ.get("DEFAULT_LOCALE", "") or "en").strip()
 DEFAULT_LOCALE = _default if _default in SUPPORTED_LOCALES else (SUPPORTED_LOCALES[0] if SUPPORTED_LOCALES else "en")
 
 # Host validation: hostname or IP, block localhost/private

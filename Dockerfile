@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
 # testssl-portal: testssl.sh + webfrontend (i18n, branding).
 # Build: docker build -f Dockerfile --build-arg TESTSSL_VERSION=3.2 -t testssl-portal .
-# Run:   docker run -d -p 5000:5000 -e BRANDING_LABEL="TLS/SSL Server Checker" -e DEFAULT_LOCALE=pt-PT testssl-portal
+# Run:   docker run -d -p 5000:5000 -e BRANDING_LABEL="TLS/SSL Server Checker" testssl-portal
 
 # ==============================================================================
 # Base Image Version
@@ -73,7 +73,7 @@ ENV TESTSSLDEBUG=0
 ENV BRANDING_LABEL="TLS/SSL Server Checker"
 ENV BRANDING_ICON_URL=""
 ENV BRANDING_LINK=""
-ENV DEFAULT_LOCALE=pt-PT
+ENV DEFAULT_LOCALE=en
 
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends \

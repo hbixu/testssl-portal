@@ -10,7 +10,8 @@ The image uses OCI labels and build arguments for version tracking:
 |----------------|-------------|---------|
 | `VERSION` | Image version tag | `1.0.0` |
 | `BUILD_DATE` | Build timestamp (ISO 8601) | `2026-03-06T12:00:00Z` |
-| `TESTSSL_REF` | testssl.sh branch or tag | `3.2` |
+| `BASEIMAGE_VERSION` | Debian base image tag | `bookworm-slim` |
+| `TESTSSL_VERSION` | testssl.sh branch or tag | `3.2` |
 
 These are set as environment variables in the container:
 - `PORTAL_VERSION` — Image version
@@ -22,8 +23,8 @@ The following components are pinned at build time for reproducibility:
 
 | Component | Source | How Pinned |
 |-----------|--------|------------|
-| Base image | Docker Hub | `debian:bookworm-slim` tag |
-| testssl.sh | GitHub | `TESTSSL_REF` build arg (branch/tag) |
+| Base image | Docker Hub | `BASEIMAGE_VERSION` build arg |
+| testssl.sh | GitHub | `TESTSSL_VERSION` build arg (branch/tag) |
 | Python packages | Debian APT | `python3-flask` from bookworm repos |
 | System packages | Debian APT | nginx-light, uwsgi, supervisor, aha, etc. |
 
@@ -80,25 +81,28 @@ Default versions are defined in `build.sh`:
 
 ```bash
 DEFAULT_VERSION="1.0.0"
-DEFAULT_TESTSSL_REF="3.2"
+DEFAULT_BASEIMAGE_VERSION="bookworm-20250224-slim"  # Pinned date tag
+DEFAULT_TESTSSL_VERSION="3.2"
 ```
 
-The base image is defined in `Dockerfile`:
+The base image is parametrized in `Dockerfile`:
 
 ```dockerfile
-FROM debian:bookworm-slim
+ARG BASEIMAGE_VERSION=bookworm-20250224-slim
+FROM debian:${BASEIMAGE_VERSION}
 ```
 
 ## Base Image Version
 
 | Property | Value |
 |----------|-------|
-| Image | `debian:bookworm-slim` |
+| Image | `debian:bookworm-YYYYMMDD-slim` |
 | Repository | [Docker Hub](https://hub.docker.com/_/debian) |
-| Tags | [Available Tags](https://hub.docker.com/_/debian/tags) |
+| Tags | [Available Tags](https://hub.docker.com/_/debian/tags?name=bookworm) |
 
 **Important:**
-- Do not use `latest` tag — always use a specific tag like `bookworm-slim`
+- Use date-pinned tags like `bookworm-20250224-slim` for reproducible builds
+- Avoid rolling tags like `bookworm-slim` or `latest` in production
 - Debian releases have limited support windows; update base image periodically
 - Security updates are applied when rebuilding the image
 

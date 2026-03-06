@@ -8,7 +8,17 @@ set -e
 # DEFAULT VALUES - Edit these to change defaults
 # ============================================================================
 DEFAULT_VERSION="1.0.0"
-DEFAULT_TESTSSL_REF="3.2"       # Branch or tag of testssl/testssl.sh (e.g. 3.2, v3.2.5, main)
+
+# Base image: https://hub.docker.com/_/debian/tags?name=bookworm
+# Check versions: ./check-versions.sh or browse Docker Hub tags
+# Format: bookworm-YYYYMMDD-slim (pinned) or bookworm-slim (rolling)
+DEFAULT_BASEIMAGE_VERSION="bookworm-20250224-slim"
+
+# testssl.sh: https://github.com/testssl/testssl.sh/releases
+# Check versions: curl -s https://api.github.com/repos/testssl/testssl.sh/releases/latest | grep tag_name
+# Or run: ./check-versions.sh
+DEFAULT_TESTSSL_VERSION="v3.2.3"   # Branch or tag (e.g. 3.2, v3.2.5, main)
+
 DEFAULT_PLATFORMS="native"      # native | linux/amd64 | linux/arm64 | linux/amd64,linux/arm64
 DEFAULT_BUILDER_NAME="testssl-portal-builder"
 DEFAULT_REGISTRY=""             # Empty for local build; e.g. docker.io/username for Docker Hub
@@ -27,25 +37,31 @@ testssl-portal - Docker build script
 Usage: $0 [OPTIONS]
 
 Options:
-    -h, --help              Show this help message
-    --version VERSION       Image version/tag (default: $DEFAULT_VERSION)
-    --testssl-ref REF       testssl.sh branch or tag (default: $DEFAULT_TESTSSL_REF)
-    --platform PLATFORM     Target platform(s) (default: $DEFAULT_PLATFORMS)
-                            Use 'native' for current platform only
-                            Examples: linux/amd64 | linux/arm64 | linux/amd64,linux/arm64
-    --registry REGISTRY     Registry prefix (e.g. docker.io/username for Docker Hub)
-    --image-name NAME       Image name (default: $DEFAULT_IMAGE_NAME)
-    --push                  Push image to registry after build (requires --registry and docker login)
-    --local                 Build locally only, do not push (default)
-    --no-cache              Build without using cache
+    -h, --help                  Show this help message
+    --version VERSION           Image version/tag (default: $DEFAULT_VERSION)
+    --baseimage-version VER     Debian base image tag (default: $DEFAULT_BASEIMAGE_VERSION)
+    --testssl-version VER       testssl.sh branch or tag (default: $DEFAULT_TESTSSL_VERSION)
+    --platform PLATFORM         Target platform(s) (default: $DEFAULT_PLATFORMS)
+                                Use 'native' for current platform only
+                                Examples: linux/amd64 | linux/arm64 | linux/amd64,linux/arm64
+    --registry REGISTRY         Registry prefix (e.g. docker.io/username for Docker Hub)
+    --image-name NAME           Image name (default: $DEFAULT_IMAGE_NAME)
+    --push                      Push image to registry after build (requires --registry and docker login)
+    --local                     Build locally only, do not push (default)
+    --no-cache                  Build without using cache
 
 Environment Variables:
     BUILD_DATE              Build date (auto-generated if not set, format: %Y-%m-%dT%H:%M:%SZ)
     VERSION                 Image version (used for tag and build-arg)
-    TESTSSL_REF              testssl.sh branch or tag to build
+    BASEIMAGE_VERSION       Debian base image tag
+    TESTSSL_VERSION         testssl.sh branch or tag to build
     PLATFORMS               Target platform(s)
     REGISTRY                Registry prefix
     IMAGE_NAME              Image name
+
+Build Modes:
+    1. Local build (default):   $0
+    2. Push to registry:        $0 --registry docker.io/username --push
 
 Examples:
     chmod +x build.sh
@@ -56,13 +72,15 @@ Examples:
     $0 --local
 
     # Build with specific testssl.sh version
-    $0 --testssl-ref v3.2.5
+    $0 --testssl-version v3.2.5
 
     # Build for linux/amd64 and linux/arm64 and push to Docker Hub (using env vars)
-    VERSION=1.0.0 TESTSSL_REF=3.2 $0 --registry docker.io/username --platform linux/amd64,linux/arm64 --push
+    VERSION=1.0.0 TESTSSL_VERSION=3.2 $0 --registry docker.io/username --platform linux/amd64,linux/arm64 --push
 
     # Same with options instead of env vars
-    $0 --version 1.0.0 --testssl-ref 3.2 --registry docker.io/username --platform linux/amd64,linux/arm64 --push
+    $0 --version 1.0.0 --testssl-version 3.2 --registry docker.io/username --platform linux/amd64,linux/arm64 --push
+
+Note: Default values can be changed at the top of this script.
 
 EOF
 }
@@ -83,8 +101,12 @@ while [[ $# -gt 0 ]]; do
             VERSION="$2"
             shift 2
             ;;
-        --testssl-ref)
-            TESTSSL_REF="$2"
+        --baseimage-version)
+            BASEIMAGE_VERSION="$2"
+            shift 2
+            ;;
+        --testssl-version)
+            TESTSSL_VERSION="$2"
             shift 2
             ;;
         --platform)
@@ -120,7 +142,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 VERSION="${VERSION:-$DEFAULT_VERSION}"
-TESTSSL_REF="${TESTSSL_REF:-$DEFAULT_TESTSSL_REF}"
+BASEIMAGE_VERSION="${BASEIMAGE_VERSION:-$DEFAULT_BASEIMAGE_VERSION}"
+TESTSSL_VERSION="${TESTSSL_VERSION:-$DEFAULT_TESTSSL_VERSION}"
 BUILD_DATE="${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}"
 
 if [ "$PUSH" = true ] && [ -z "$REGISTRY" ]; then
@@ -134,11 +157,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 echo -e "${BLUE}=== Building testssl-portal ===${NC}"
-echo "Build date:   $BUILD_DATE"
-echo "Version:      $VERSION"
-echo "TESTSSL_REF:  $TESTSSL_REF"
-echo "Image name:   $IMAGE_NAME"
-echo "Platform(s):  $PLATFORMS"
+echo "Build date:       $BUILD_DATE"
+echo "Version:          $VERSION"
+echo "Base image:       debian:$BASEIMAGE_VERSION"
+echo "testssl.sh:       $TESTSSL_VERSION"
+echo "Image name:       $IMAGE_NAME"
+echo "Platform(s):      $PLATFORMS"
 if [ -n "$REGISTRY" ]; then
     REGISTRY="${REGISTRY%/}"
     echo "Registry:     $REGISTRY"
@@ -156,7 +180,8 @@ echo ""
 BUILD_ARGS=(
     --build-arg "BUILD_DATE=$BUILD_DATE"
     --build-arg "VERSION=$VERSION"
-    --build-arg "TESTSSL_REF=$TESTSSL_REF"
+    --build-arg "BASEIMAGE_VERSION=$BASEIMAGE_VERSION"
+    --build-arg "TESTSSL_VERSION=$TESTSSL_VERSION"
 )
 
 TAGS=(

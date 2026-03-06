@@ -712,12 +712,12 @@ def run_scan():
     )
 
 
-# testssl version: use TESTSSL_VERSION from image build (set in Dockerfile from TESTSSL_REF); fallback to subprocess only when not in Docker
+# testssl version: use TESTSSL_VERSION from image build (set in Dockerfile from TESTSSL_VERSION ARG); fallback to subprocess only when not in Docker
 _testssl_version_cache = None
 
 
 def get_testssl_version():
-    """Version fixed at image build (TESTSSL_REF); no subprocess in Docker."""
+    """Version fixed at image build (TESTSSL_VERSION ARG); no subprocess in Docker."""
     env_version = os.environ.get("TESTSSL_VERSION", "").strip()
     if env_version:
         return f"testssl.sh {env_version}"

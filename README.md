@@ -28,6 +28,8 @@ testssl-portal/
 ├── Dockerfile              # Multi-stage build: testssl.sh + Flask webfrontend
 ├── docker-compose.yml      # Docker Compose example
 ├── build.sh                # Helper script for building images
+├── check-versions.sh       # Check for component updates (Linux/macOS)
+├── check-versions.ps1      # Check for component updates (Windows PowerShell)
 ├── entrypoint.sh           # Container entrypoint (sets timeouts)
 ├── supervisord.conf        # Process supervisor config (nginx + uWSGI)
 ├── nginx.conf              # Nginx main configuration
@@ -57,11 +59,11 @@ chmod +x build.sh
 ./build.sh
 
 # Build with specific testssl.sh version
-./build.sh --version 1.0.0 --testssl-ref v3.2.5
+./build.sh --version 1.0.0 --testssl-version v3.2.5
 
 # Multi-platform build and push to Docker Hub
 docker login
-./build.sh --version 1.0.0 --testssl-ref 3.2 --registry docker.io/username --platform linux/amd64,linux/arm64 --push
+./build.sh --version 1.0.0 --testssl-version 3.2 --registry docker.io/username --platform linux/amd64,linux/arm64 --push
 ```
 
 ### Option 2: Direct Docker Build (Single Platform)
@@ -70,7 +72,7 @@ docker login
 docker build \
   --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
   --build-arg VERSION=1.0.0 \
-  --build-arg TESTSSL_REF=3.2 \
+  --build-arg TESTSSL_VERSION=3.2 \
   -t testssl-portal:1.0.0 \
   .
 ```
@@ -88,7 +90,7 @@ docker buildx build \
   --platform linux/amd64,linux/arm64 \
   --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
   --build-arg VERSION=1.0.0 \
-  --build-arg TESTSSL_REF=3.2 \
+  --build-arg TESTSSL_VERSION=3.2 \
   --tag username/testssl-portal:1.0.0 \
   --tag username/testssl-portal:latest \
   --push \
@@ -119,7 +121,8 @@ All environment variables are **optional**. Set them only to override the defaul
 |----------|-------------|---------|
 | `VERSION` | Image version tag | `1.0.0` |
 | `BUILD_DATE` | Build timestamp (ISO 8601) | auto-generated |
-| `TESTSSL_REF` | testssl.sh branch or tag to clone | `3.2` |
+| `BASEIMAGE_VERSION` | Debian base image tag | `bookworm-slim` |
+| `TESTSSL_VERSION` | testssl.sh branch or tag to clone | `3.2` |
 
 ### Quick Start
 

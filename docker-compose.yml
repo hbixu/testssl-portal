@@ -7,7 +7,7 @@ services:
     # build: .  # Uncomment to build from source
     container_name: testssl-portal
     ports:
-      - "5000:5000"
+      - "5000:5000"  # Web UI (nginx -> uWSGI)
     # volumes:
     #   # Custom branding (optional): mount your logo file
     #   - ./branding/logo.svg:/testssl/static/custom-logo.svg:ro
@@ -25,3 +25,9 @@ services:
       # - UWSGI_PROCESSES=4
       # - UWSGI_THREADS=2
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 15s
+      retries: 3

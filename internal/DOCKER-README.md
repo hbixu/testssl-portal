@@ -2,8 +2,8 @@
 
 Web portal for TLS/SSL server testing using testssl.sh. Features real-time streaming output, internationalization (en, pt-PT), customizable branding, and dark/light themes.
 
-[![Source](https://img.shields.io/badge/Source-GitHub-blue)](https://github.com/YOUR_USERNAME/testssl-portal)
-[![Platforms](https://img.shields.io/badge/Platforms-amd64%20%7C%20arm64-lightgrey)](https://hub.docker.com/r/YOUR_USERNAME/testssl-portal)
+[![Source](https://img.shields.io/badge/Source-GitHub-blue)](https://github.com/hbixu/testssl-portal)
+[![Platforms](https://img.shields.io/badge/Platforms-amd64%20%7C%20arm64-lightgrey)](https://hub.docker.com/r/hbixu/testssl-portal)
 
 ## Features
 
@@ -29,10 +29,10 @@ Web portal for TLS/SSL server testing using testssl.sh. Features real-time strea
 
 ```bash
 # Pull the image
-docker pull YOUR_USERNAME/testssl-portal:1.0.0
+docker pull hbixu/testssl-portal:1.0.0
 
 # Run the container
-docker run -d -p 5000:5000 --name testssl-portal YOUR_USERNAME/testssl-portal:1.0.0
+docker run -d -p 5000:5000 --name testssl-portal hbixu/testssl-portal:1.0.0
 ```
 
 Open [http://localhost:5000](http://localhost:5000)
@@ -49,14 +49,14 @@ Open [http://localhost:5000](http://localhost:5000)
 | `BRANDING_LINK` | No | URL when clicking the branding |
 | `DEFAULT_LOCALE` | No | UI language: `en` (default), `pt-PT` |
 
-See [GitHub repository](https://github.com/YOUR_USERNAME/testssl-portal) for full environment variable list.
+See [GitHub repository](https://github.com/hbixu/testssl-portal) for full environment variable list.
 
 ## Example docker-compose
 
 ```yaml
 services:
   testssl-portal:
-    image: YOUR_USERNAME/testssl-portal:1.0.0
+    image: hbixu/testssl-portal:1.0.0
     ports:
       - "5000:5000"
     environment:
@@ -80,6 +80,6 @@ See repository for full security documentation.
 
 ## Links
 
-- **Source:** [GitHub](https://github.com/YOUR_USERNAME/testssl-portal)
-- **Issues:** [GitHub Issues](https://github.com/YOUR_USERNAME/testssl-portal/issues)
-- **License:** [GPL-3.0](https://github.com/YOUR_USERNAME/testssl-portal/blob/main/LICENSE)
+- **Source:** [GitHub](https://github.com/hbixu/testssl-portal)
+- **Issues:** [GitHub Issues](https://github.com/hbixu/testssl-portal/issues)
+- **License:** [GPL-3.0](https://github.com/hbixu/testssl-portal/blob/main/LICENSE)

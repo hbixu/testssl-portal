@@ -1,0 +1,85 @@
+{
+    "meta": {
+        "lang": "en",
+        "name": "English"
+    },
+    "common": {
+        "appName": "TLS/SSL Server Checker",
+        "language": "Language",
+        "infoTooltipAria": "Detailed description",
+        "themeLabel": "Theme",
+        "themeDark": "Dark mode",
+        "themeLight": "Light mode",
+        "newTest": "New test",
+        "about": "About",
+        "cancel": "Cancel",
+        "copy": "Copy",
+        "export": "Export",
+        "close": "Close"
+    },
+    "home": {
+        "pageTitle": "TLS/SSL Server Checker",
+        "intro": "Check a server's TLS/SSL configuration — certificates, protocols, ciphers and known vulnerabilities. Enter host and port, choose the scan type and start. The scan may take up to 5 minutes.",
+        "target": "Target",
+        "hostPlaceholder": "Hostname or IP",
+        "port": "Port",
+        "scanType": "Scan type",
+        "scanCertOnly": "Fast scan: Server defaults and certificate (expiry and chain)",
+        "scanCertOnlyTooltip": "Checks server defaults (protocols and ciphers offered) and certificate validity and chain. Fast scan, no vulnerability tests.",
+        "scanNormal": "Normal scan: Protocols, ciphers and certificate",
+        "scanNormalTooltip": "Checks TLS protocols, cipher suites and certificate. Includes basic security checks. Recommended for most uses.",
+        "scanFull": "Full scan: Vulnerability checks (may trigger IDS)",
+        "scanFullTooltip": "Includes all normal scan tests plus known vulnerability checks (e.g. POODLE, BEAST). These checks may be detected by intrusion detection systems (IDS) and your IP may be blocked or logged.",
+        "starttls": "STARTTLS",
+        "useStarttls": "Use STARTTLS",
+        "protocol": "Protocol",
+        "confirmLabel": "I confirm that I am authorized to scan this system",
+        "confirmNotice": "Your IP may be logged by intrusion detection systems.",
+        "submit": "Start scan"
+    },
+    "result": {
+        "title": "Result",
+        "target": "Target",
+        "statusRunning": "Running…",
+        "statusDone": "Done",
+        "outputLabel": "Output (streaming)",
+        "cancelAndBack": "Cancel and go back",
+        "copyResult": "Copy result",
+        "copyResultCopied": "Copied!",
+        "exportDropdown": "Export",
+        "exportText": "Export as text (.txt)",
+        "exportJson": "Export JSON",
+        "exportHtml": "Export HTML (.html)",
+        "exportMarkdown": "Export Markdown (.md)",
+        "newTestLink": "New test",
+        "notFound": "Scan not found or expired.",
+        "streamError": "Could not connect to the scan output. The scan may still be running. Refresh the page to try again or go back."
+    },
+    "about": {
+        "title": "About",
+        "backToTest": "Back to test",
+        "back": "Back",
+        "intro": "This portal allows you to check servers' TLS/SSL configuration using testssl.sh.",
+        "credits": "Credits and version",
+        "licenseTitle": "Licensing",
+        "licenseText": "This project is licensed under the GNU General Public License v3.0 (or as per the repository). See the LICENSE file.",
+        "licenseLink": "Full license text",
+        "depsTitle": "Dependencies and credits",
+        "depsIntro": "This portal uses the following main components:",
+        "linksTitle": "Links",
+        "version": "Version",
+        "versionsTitle": "Versions",
+        "versionTestssl": "testssl.sh",
+        "versionPortal": "Portal"
+    },
+    "footer": {
+        "usesTestssl": "This portal uses testssl.sh.",
+        "moreInfo": "More information at"
+    },
+    "errors": {
+        "wrongHost": "Invalid hostname.",
+        "wrongPort": "Invalid port number.",
+        "connectionFailed": "Connection failed.",
+        "confirmRequired": "You must confirm that you are authorized to scan this system."
+    }
+}

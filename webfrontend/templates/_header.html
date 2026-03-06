@@ -1,0 +1,44 @@
+<header>
+  <div class="branding">
+    <a href="{{ branding.link or url_for('index') }}" class="branding-link"{% if use_top_links %} target="_top"{% endif %}>
+      <span class="branding-icon" aria-hidden="true">
+        {% if branding.icon_url %}
+        <img src="{{ branding.icon_url }}" alt="">
+        {% else %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        {% endif %}
+      </span>
+      <span class="branding-label">{{ branding.label or t.common.appName }}</span>
+    </a>
+  </div>
+  <div class="header-right">
+    <div class="theme-toggle-wrap">
+      <span class="theme-toggle-label" id="theme-label">{{ t.common.themeLabel }}</span>
+      <button type="button" class="theme-toggle" id="theme-toggle" role="switch" aria-checked="false" aria-labelledby="theme-label" title="{{ t.common.themeDark }}" data-theme-light="{{ t.common.themeLight }}" data-theme-dark="{{ t.common.themeDark }}">
+        <span class="theme-toggle-track">
+          <span class="theme-toggle-thumb">
+            <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </span>
+          <svg class="theme-icon-track theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <svg class="theme-icon-track theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </span>
+      </button>
+    </div>
+    <div class="lang-select-wrap custom-select-wrap" data-redirect="lang">
+      <select id="lang" name="lang" aria-label="{{ t.common.language }}">
+        {% for code, name in locale_options %}
+        <option value="{{ code }}" {{ 'selected' if code == locale else '' }}>{{ name }}</option>
+        {% endfor %}
+      </select>
+      <button type="button" class="custom-select-trigger lang-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="{{ t.common.language }}"></button>
+      <div class="custom-select-dropdown" role="listbox" hidden></div>
+    </div>
+    <nav>
+      <a href="{{ url_for('about') }}"{% if use_top_links %} target="_top"{% endif %}>{{ t.common.about }}</a>
+    </nav>
+  </div>
+</header>

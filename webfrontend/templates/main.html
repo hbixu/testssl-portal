@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert-error" role="alert">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+<div id="form-api-error" class="alert-error" role="alert" hidden></div>
+<p class="intro">{{ t.home.intro }}</p>
+<form action="{{ url_for('index') }}" method="post" id="scan-form">
+  <div class="form-grid">
+    <div class="card">
+      <h2>{{ t.home.target }}</h2>
+      <div class="form-row row-2">
+        <div>
+          <label for="host">{{ t.home.hostPlaceholder }}</label>
+          <input type="text" id="host" name="host" placeholder="example.com" value="{{ request.form.host or '' }}" required>
+        </div>
+        <div>
+          <label for="port">{{ t.home.port }}</label>
+          <input type="number" id="port" name="port" value="{{ request.form.port or '443' }}" min="1" max="65535" required>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>{{ t.home.scanType }}</h2>
+      <div class="form-row radio-group">
+        <label>
+          <input type="radio" name="scantype" value="certonly" {{ 'checked' if request.form.scantype == 'certonly' else '' }}>
+          <span class="scan-option-text">
+            <span>{{ t.home.scanCertOnly }}</span>
+            <span class="info-icon" title="{{ t.home.scanCertOnlyTooltip }}" aria-label="{{ t.common.infoTooltipAria }}" role="img"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></span>
+          </span>
+        </label>
+        <label>
+          <input type="radio" name="scantype" value="normal" {{ 'checked' if not request.form.scantype or request.form.scantype == 'normal' else '' }}>
+          <span class="scan-option-text">
+            <span>{{ t.home.scanNormal }}</span>
+            <span class="info-icon" title="{{ t.home.scanNormalTooltip }}" aria-label="{{ t.common.infoTooltipAria }}" role="img"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></span>
+          </span>
+        </label>
+        <label>
+          <input type="radio" name="scantype" value="full" {{ 'checked' if request.form.scantype == 'full' else '' }}>
+          <span class="scan-option-text">
+            <span>{{ t.home.scanFull }}</span>
+            <span class="info-icon" title="{{ t.home.scanFullTooltip }}" aria-label="{{ t.common.infoTooltipAria }}" role="img"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></span>
+          </span>
+        </label>
+      </div>
+    </div>
+    <div class="card">
+      <h2>{{ t.home.starttls }}</h2>
+      <div class="form-row checkbox-group">
+        <label>
+          <input type="checkbox" name="starttls" value="yes" {{ 'checked' if request.form.starttls == 'yes' else '' }}>
+          <span>{{ t.home.useStarttls }}</span>
+        </label>
+      </div>
+      <div class="form-row" style="margin-top: 0.75rem;">
+        <label for="protocol" id="protocol-label">{{ t.home.protocol }}</label>
+        <div class="custom-select-wrap" data-select-id="protocol">
+          <select id="protocol" name="protocol" aria-label="{{ t.home.protocol }}">
+            <option value="smtp" {{ 'selected' if request.form.protocol == 'smtp' else '' }}>SMTP</option>
+            <option value="ftp" {{ 'selected' if request.form.protocol == 'ftp' else '' }}>FTP</option>
+            <option value="pop3" {{ 'selected' if request.form.protocol == 'pop3' else '' }}>POP3</option>
+            <option value="imap" {{ 'selected' if request.form.protocol == 'imap' else '' }}>IMAP</option>
+            <option value="xmpp" {{ 'selected' if request.form.protocol == 'xmpp' else '' }}>XMPP</option>
+            <option value="telnet" {{ 'selected' if request.form.protocol == 'telnet' else '' }}>Telnet</option>
+            <option value="ldap" {{ 'selected' if request.form.protocol == 'ldap' else '' }}>LDAP</option>
+          </select>
+          <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="protocol-label"></button>
+          <div class="custom-select-dropdown" role="listbox" id="protocol-listbox" hidden></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="form-row checkbox-group">
+        <label>
+          <input type="checkbox" name="confirm" id="confirm" value="yes" required data-required-msg="{{ t.errors.confirmRequired }}" {{ 'checked' if request.form.confirm == 'yes' else '' }}>
+          <span>{{ t.home.confirmLabel }}</span>
+        </label>
+      </div>
+      <p class="notice">{{ t.home.confirmNotice }}</p>
+    </div>
+  </div>
+  <div class="actions">
+    <button type="submit" class="btn btn-primary" id="scan-submit-btn">{{ t.home.submit }}</button>
+  </div>
+</form>
+{% endblock %}
+{% block body_scripts %}
+<script>
+(function() {
+  var confirmEl = document.getElementById('confirm');
+  if (confirmEl) {
+    var msg = confirmEl.getAttribute('data-required-msg') || '';
+    function updateValidity() {
+      confirmEl.setCustomValidity(confirmEl.checked ? '' : msg);
+    }
+    confirmEl.addEventListener('change', updateValidity);
+    updateValidity();
+  }
+  var form = document.getElementById('scan-form');
+  var apiError = document.getElementById('form-api-error');
+  var submitBtn = document.getElementById('scan-submit-btn');
+  if (form) {
+    form.addEventListener('submit', function(ev) {
+      ev.preventDefault();
+      if (apiError) { apiError.hidden = true; apiError.textContent = ''; }
+      if (submitBtn) { submitBtn.disabled = true; }
+      fetch('{{ url_for("start_scan") }}', {
+        method: 'POST',
+        body: new FormData(form),
+      }).then(function(res) {
+        return res.json().then(function(data) {
+          if (res.ok && data.id) {
+            window.location.href = '{{ url_for("result_page", scan_id="__ID__") }}'.replace('__ID__', data.id);
+            return;
+          }
+          if (apiError) {
+            apiError.textContent = data.error || 'Request failed.';
+            apiError.hidden = false;
+          }
+        }).catch(function() {
+          if (apiError) {
+            apiError.textContent = 'Request failed.';
+            apiError.hidden = false;
+          }
+        });
+      }).finally(function() {
+        if (submitBtn) submitBtn.disabled = false;
+      });
+    });
+  }
+})();
+</script>
+{% endblock %}

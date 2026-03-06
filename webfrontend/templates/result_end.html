@@ -1,0 +1,92 @@
+
+      </div>
+    </div>
+    <div class="result-when-done visible" id="result-when-done" aria-live="polite">
+      <span class="badge badge-done">{{ t.result.statusDone }}</span>
+      <a href="{{ url_for('index') }}" class="btn-new-test" target="_top">{{ t.result.newTestLink }}</a>
+    </div>
+  </div>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/custom-select.js') }}"></script>
+  <script>
+  (function(){
+    var body = document.getElementById('result-body');
+    var btnCopy = document.getElementById('btn-copy');
+    var statusBar = document.getElementById('statusBar');
+    var placeholder = document.getElementById('result-body-placeholder');
+    var copyDoneMsg = '{{ t.result.copyResultCopied }}';
+
+    if (placeholder && body && body.contains(placeholder)) {
+      try { placeholder.remove(); } catch(e) {}
+    }
+
+    if (statusBar) {
+      statusBar.classList.remove('running');
+      statusBar.classList.add('done');
+      var progressWrap = statusBar.querySelector('.progress-wrap');
+      if (progressWrap) progressWrap.style.display = 'none';
+      var cancelEl = document.getElementById('status-bar-cancel');
+      if (cancelEl) cancelEl.style.display = 'none';
+      var badge = statusBar.querySelector('.badge-running');
+      if (badge) {
+        badge.classList.remove('badge-running');
+        badge.classList.add('badge-done');
+        badge.textContent = '{{ t.result.statusDone }}';
+      }
+    }
+
+    if (btnCopy && body) {
+      btnCopy.addEventListener('click', function() {
+        var range = document.createRange();
+        range.selectNodeContents(body);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        try {
+          document.execCommand('copy');
+          if (copyDoneMsg) {
+            var origTitle = btnCopy.getAttribute('title');
+            btnCopy.setAttribute('title', copyDoneMsg);
+            var toast = document.createElement('span');
+            toast.className = 'copy-toast';
+            toast.textContent = copyDoneMsg;
+            btnCopy.parentNode.appendChild(toast);
+            setTimeout(function() {
+              if (toast.parentNode) toast.parentNode.removeChild(toast);
+              if (origTitle) btnCopy.setAttribute('title', origTitle);
+            }, 2000);
+          }
+        } catch(e) {}
+        sel.removeAllRanges();
+      });
+    }
+
+    var exportSelect = document.getElementById('export-format');
+    if (exportSelect && body) {
+      exportSelect.addEventListener('change', function() {
+        var v = this.value;
+        this.selectedIndex = 0;
+        this.dispatchEvent(new Event('change', { bubbles: true }));
+        if (!v) return;
+        var blob, name, mime;
+        if (v === 'txt') {
+          blob = new Blob([body.innerText], { type: 'text/plain;charset=utf-8' });
+          name = 'testssl-result.txt';
+        } else if (v === 'html') {
+          var doc = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>testssl result</title></head><body><pre style="font-family:monospace;white-space:pre-wrap">' + body.innerText + '</pre></body></html>';
+          blob = new Blob([doc], { type: 'text/html;charset=utf-8' });
+          name = 'testssl-result.html';
+        }
+        if (blob) {
+          var a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = name;
+          a.click();
+          URL.revokeObjectURL(a.href);
+        }
+      });
+    }
+  })();
+  </script>
+</body>
+</html>

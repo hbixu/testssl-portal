@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ t.about.title }} — {{ t.common.appName }}{% endblock %}
+{% block content %}
+<div class="about-content">
+  <h1>{{ t.about.title }}</h1>
+  <p class="intro">{{ t.about.intro }}</p>
+
+  <h2>{{ t.about.licenseTitle }}</h2>
+  <p>{{ t.about.licenseText }}</p>
+
+  <h2>{{ t.about.depsTitle }}</h2>
+  <p>{{ t.about.depsIntro }}</p>
+  <ul>
+    <li><strong>testssl.sh</strong> — <a href="https://github.com/testssl/testssl.sh">https://github.com/testssl/testssl.sh</a></li>
+    <li><strong>Flask</strong> — <a href="https://flask.palletsprojects.com/">https://flask.palletsprojects.com/</a></li>
+    <li><strong>aha</strong> — ANSI to HTML converter</li>
+    <li><strong>Nginx</strong> — <a href="https://nginx.org/">https://nginx.org/</a></li>
+    <li><strong>uWSGI</strong> — <a href="https://uwsgi-docs.readthedocs.io/">https://uwsgi-docs.readthedocs.io/</a></li>
+  </ul>
+  <h2>{{ t.about.versionsTitle }}</h2>
+  <ul class="version-list">
+    {% if portal_version and portal_version != '—' %}
+    <li><strong>{{ t.about.versionPortal }}:</strong> <code>{{ portal_version }}</code></li>
+    {% endif %}
+    {% if testssl_version %}
+    <li><strong>{{ t.about.versionTestssl }}:</strong> <code>{{ testssl_version }}</code></li>
+    {% endif %}
+  </ul>
+
+  <h2>{{ t.about.linksTitle }}</h2>
+  <ul>
+    <li><a href="https://testssl.sh/">testssl.sh</a> — official site</li>
+    <li>testssl-portal — this frontend</li>
+  </ul>
+
+  <p class="back-link"><a href="{{ url_for('index') }}" class="btn btn-primary">{{ t.about.back }}</a></p>
+</div>
+{% endblock %}

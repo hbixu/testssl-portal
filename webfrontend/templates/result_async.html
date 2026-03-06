@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="{{ locale.split('-')[0] }}" data-theme="{{ theme }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ t.result.title }} — {{ t.common.appName }}</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+  <div class="layout">
+    {% include '_header.html' %}
+    <div class="status-bar running" id="statusBar">
+      <div>
+        <div class="target">{{ t.result.target }} <span>{{ target }}</span></div>
+        <div class="progress-wrap">
+          <div class="bar"></div>
+        </div>
+      </div>
+      <div class="status-bar-right">
+        <span class="badge badge-running">{{ t.result.statusRunning }}</span>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary status-bar-cancel" id="status-bar-cancel">{{ t.result.cancelAndBack }}</a>
+      </div>
+    </div>
+    <div class="result-container">
+      <div class="result-toolbar">
+        <div class="left">
+          <span>{{ t.result.outputLabel }}</span>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn-copy" id="btn-copy" title="{{ t.result.copyResult }}" aria-label="{{ t.result.copyResult }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <div class="export-wrap custom-select-wrap export-select-wrap" data-select-id="export">
+            <select id="export-format" aria-label="{{ t.result.exportDropdown }}">
+              <option value="" selected>{{ t.result.exportDropdown }}</option>
+              <option value="txt">{{ t.result.exportText }}</option>
+              <option value="html">{{ t.result.exportHtml }}</option>
+            </select>
+            <button type="button" class="custom-select-trigger export-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="{{ t.result.exportDropdown }}"></button>
+            <div class="custom-select-dropdown" role="listbox" hidden></div>
+          </div>
+        </div>
+      </div>
+      <div class="result-body" id="result-body" data-scan-id="{{ scan_id }}" data-stream-url="{{ url_for('result_stream', scan_id=scan_id) }}">
+        <p class="line-info" id="result-body-placeholder">{{ t.result.statusRunning }}</p>
+      </div>
+    </div>
+    <div class="result-when-done" id="result-when-done" aria-live="polite">
+      <span class="badge badge-done">{{ t.result.statusDone }}</span>
+      <a href="{{ url_for('index') }}" class="btn-new-test">{{ t.result.newTestLink }}</a>
+    </div>
+  </div>
+  <script>
+  (function(){
+    var body = document.getElementById('result-body');
+    var placeholder = document.getElementById('result-body-placeholder');
+    var statusBar = document.getElementById('statusBar');
+    var whenDone = document.getElementById('result-when-done');
+    var streamUrl = body && body.getAttribute('data-stream-url');
+    var copyDoneMsg = '{{ t.result.copyResultCopied }}';
+    var statusDoneText = '{{ t.result.statusDone }}';
+    var streamErrorMsg = {{ (t.result.streamError or '') | tojson }};
+
+    if (!body || !streamUrl) return;
+
+    var useTail = true;
+    var tailUrl = streamUrl.replace(/\/stream\/?$/, '/tail');
+
+    var streamDebug = { pageReady: Date.now(), eventSourceCreated: null, firstChunkReceived: null, firstInsert: null };
+    function logStreamDebug(label) {
+      var t = Date.now();
+      var msg = '[stream-debug] ' + label + ' at ' + t + ' (+' + (t - streamDebug.pageReady) + ' ms from page ready)';
+      if (typeof console !== 'undefined' && console.log) console.log(msg);
+    }
+    logStreamDebug('script_run');
+
+    var last = 0, throttle = 150;
+    function scrollToBottom() {
+      var now = Date.now();
+      if (now - last < throttle) return;
+      last = now;
+      body.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+    var obs = new MutationObserver(scrollToBottom);
+    obs.observe(body, { childList: true, subtree: true });
+
+    function showDone() {
+      if (placeholder && body.contains(placeholder)) try { placeholder.remove(); } catch(e) {}
+      if (statusBar) {
+        statusBar.classList.remove('running');
+        statusBar.classList.add('done');
+        var progressWrap = statusBar.querySelector('.progress-wrap');
+        if (progressWrap) progressWrap.style.display = 'none';
+        var cancelEl = document.getElementById('status-bar-cancel');
+        if (cancelEl) cancelEl.style.display = 'none';
+        var badge = statusBar.querySelector('.badge-running');
+        if (badge) {
+          badge.classList.remove('badge-running');
+          badge.classList.add('badge-done');
+          badge.textContent = statusDoneText;
+        }
+      }
+      if (whenDone) {
+        whenDone.classList.add('visible');
+        whenDone.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+
+      var btnCopy = document.getElementById('btn-copy');
+      if (btnCopy && body) {
+        btnCopy.addEventListener('click', function() {
+          var range = document.createRange();
+          range.selectNodeContents(body);
+          var sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+          try {
+            document.execCommand('copy');
+            if (copyDoneMsg) {
+              var origTitle = btnCopy.getAttribute('title');
+              btnCopy.setAttribute('title', copyDoneMsg);
+              var toast = document.createElement('span');
+              toast.className = 'copy-toast';
+              toast.textContent = copyDoneMsg;
+              btnCopy.parentNode.appendChild(toast);
+              setTimeout(function() {
+                if (toast.parentNode) toast.parentNode.removeChild(toast);
+                if (origTitle) btnCopy.setAttribute('title', origTitle);
+              }, 2000);
+            }
+          } catch(e) {}
+          sel.removeAllRanges();
+        });
+      }
+      var exportSelect = document.getElementById('export-format');
+      if (exportSelect && body) {
+        exportSelect.addEventListener('change', function() {
+          var v = this.value;
+          this.selectedIndex = 0;
+          this.dispatchEvent(new Event('change', { bubbles: true }));
+          if (!v) return;
+          var blob, name;
+          if (v === 'txt') {
+            blob = new Blob([body.innerText], { type: 'text/plain;charset=utf-8' });
+            name = 'testssl-result.txt';
+          } else if (v === 'html') {
+            var doc = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>testssl result</title></head><body><pre style="font-family:monospace;white-space:pre-wrap">' + body.innerText + '</pre></body></html>';
+            blob = new Blob([doc], { type: 'text/html;charset=utf-8' });
+            name = 'testssl-result.html';
+          }
+          if (blob) {
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = name;
+            a.click();
+            URL.revokeObjectURL(a.href);
+          }
+        });
+      }
+    }
+
+    function showStreamError() {
+      if (placeholder && body.contains(placeholder)) {
+        placeholder.outerHTML = '<p class="line-err">' + (streamErrorMsg || 'Could not connect to stream.') + '</p><p><a href="{{ url_for("index") }}" class="btn btn-primary">{{ t.result.cancelAndBack }}</a></p>';
+      }
+      if (statusBar) statusBar.classList.remove('running');
+    }
+
+    if (useTail) {
+      var tailOffset = 0;
+      var tailPollMs = 300;
+      var tailFailures = 0;
+      var maxTailFailures = 10;
+      streamDebug.eventSourceCreated = Date.now();
+      logStreamDebug('tail_polling_start');
+      function pollTail() {
+        fetch(tailUrl + '?since=' + tailOffset).then(function(r) {
+          if (!r.ok) throw new Error('tail ' + r.status);
+          return r.json();
+        }).then(function(res) {
+          tailFailures = 0;
+          var start = res.start != null ? res.start : 0;
+          var toAppend = res.data ? res.data.substring(Math.max(0, tailOffset - start)) : '';
+          if (toAppend.length > 0) {
+            if (streamDebug.firstChunkReceived == null) {
+              streamDebug.firstChunkReceived = Date.now();
+              logStreamDebug('first_chunk_received');
+            }
+            if (placeholder && body.contains(placeholder)) { placeholder.remove(); placeholder = null; }
+            if (streamDebug.firstInsert == null) {
+              streamDebug.firstInsert = Date.now();
+              logStreamDebug('first_insertAdjacentHTML');
+            }
+            body.insertAdjacentHTML('beforeend', toAppend);
+            scrollToBottom();
+          }
+          tailOffset = res.size;
+          if (res.done) {
+            clearInterval(tailInterval);
+            showDone();
+          }
+        }).catch(function() {
+          tailFailures++;
+          if (tailFailures >= maxTailFailures && (!whenDone || !whenDone.classList.contains('visible'))) showStreamError();
+        });
+      }
+      var tailInterval = setInterval(pollTail, tailPollMs);
+      pollTail();
+    } else {
+      streamDebug.eventSourceCreated = Date.now();
+      logStreamDebug('eventSource_created');
+      var evtSource = new EventSource(streamUrl);
+      function onMessage(e) {
+        if (!e.data) return;
+        try {
+          var msg = JSON.parse(e.data);
+          if (msg.t === 'chunk' && msg.d) {
+            if (streamDebug.firstChunkReceived == null) {
+              streamDebug.firstChunkReceived = Date.now();
+              logStreamDebug('first_chunk_received');
+            }
+            if (placeholder && body.contains(placeholder)) { placeholder.remove(); placeholder = null; }
+            if (streamDebug.firstInsert == null) {
+              streamDebug.firstInsert = Date.now();
+              logStreamDebug('first_insertAdjacentHTML');
+            }
+            body.insertAdjacentHTML('beforeend', msg.d);
+            scrollToBottom();
+          } else if (msg.t === 'done') {
+            evtSource.close();
+            showDone();
+          }
+        } catch (err) {}
+      }
+      evtSource.addEventListener('message', onMessage);
+      evtSource.onerror = function() {
+        evtSource.close();
+        if (!whenDone || !whenDone.classList.contains('visible')) showStreamError();
+      };
+    }
+  })();
+  </script>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/custom-select.js') }}"></script>
+</body>
+</html>

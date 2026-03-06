@@ -1,0 +1,85 @@
+{
+    "meta": {
+        "lang": "pt-PT",
+        "name": "Português"
+    },
+    "common": {
+        "appName": "TLS/SSL Server Checker",
+        "language": "Idioma",
+        "infoTooltipAria": "Descrição detalhada",
+        "themeLabel": "Tema",
+        "themeDark": "Tema escuro",
+        "themeLight": "Tema claro",
+        "newTest": "Novo teste",
+        "about": "Sobre",
+        "cancel": "Cancelar",
+        "copy": "Copiar",
+        "export": "Exportar",
+        "close": "Fechar"
+    },
+    "home": {
+        "pageTitle": "TLS/SSL Server Checker",
+        "intro": "Verifique a configuração TLS/SSL de um servidor — certificados, protocolos, cifras e vulnerabilidades conhecidas. Indique o host e a porta, escolha o tipo de scan e inicie. O scan pode demorar até 5 minutos.",
+        "target": "Alvo",
+        "hostPlaceholder": "Hostname ou IP",
+        "port": "Porta",
+        "scanType": "Tipo de scan",
+        "scanCertOnly": "Scan rápido: Predefinições do servidor e certificado (expiração e cadeia)",
+        "scanCertOnlyTooltip": "Verifica as predefinições do servidor (protocolos e cifras oferecidas) e a validade e cadeia do certificado. Scan rápido, sem testes de vulnerabilidades.",
+        "scanNormal": "Scan normal: Protocolos, cifras e certificado",
+        "scanNormalTooltip": "Verifica protocolos TLS, conjuntos de cifras e certificado. Inclui verificações de segurança básicas. Recomendado para a maioria dos casos.",
+        "scanFull": "Scan completo: Testes de vulnerabilidades (pode activar IDS)",
+        "scanFullTooltip": "Inclui todos os testes do scan normal mais verificações de vulnerabilidades conhecidas (ex.: POODLE, BEAST). Estes testes podem ser detectados por sistemas de deteção de intrusão (IDS) e o seu IP pode ser bloqueado ou registado.",
+        "starttls": "STARTTLS",
+        "useStarttls": "Usar STARTTLS",
+        "protocol": "Protocolo",
+        "confirmLabel": "Confirmo que tenho autorização para analisar este sistema",
+        "confirmNotice": "O seu IP pode ser registado por sistemas de detecção de intrusão.",
+        "submit": "Iniciar scan"
+    },
+    "result": {
+        "title": "Resultado",
+        "target": "Alvo",
+        "statusRunning": "A executar…",
+        "statusDone": "Concluído",
+        "outputLabel": "Output (streaming)",
+        "cancelAndBack": "Cancelar e voltar",
+        "copyResult": "Copiar resultado",
+        "copyResultCopied": "Copiado!",
+        "exportDropdown": "Exportar",
+        "exportText": "Exportar como texto (.txt)",
+        "exportJson": "Exportar JSON",
+        "exportHtml": "Exportar HTML (.html)",
+        "exportMarkdown": "Exportar Markdown (.md)",
+        "newTestLink": "Novo teste",
+        "notFound": "Scan não encontrado ou expirado.",
+        "streamError": "Não foi possível ligar à saída do scan. O teste pode ainda estar a correr. Actualize a página para tentar de novo ou volte atrás."
+    },
+    "about": {
+        "title": "Acerca",
+        "backToTest": "Voltar ao teste",
+        "back": "Voltar",
+        "intro": "Este portal permite verificar a configuração TLS/SSL de servidores utilizando o testssl.sh.",
+        "credits": "Créditos e versão",
+        "licenseTitle": "Licenciamento",
+        "licenseText": "Este projeto está licenciado sob a GNU General Public License v3.0 (ou conforme o repositório). Consulte o ficheiro LICENSE.",
+        "licenseLink": "Texto completo da licença",
+        "depsTitle": "Dependências e créditos",
+        "depsIntro": "Este portal utiliza as seguintes componentes principais:",
+        "linksTitle": "Ligações",
+        "version": "Versão",
+        "versionsTitle": "Versões",
+        "versionTestssl": "testssl.sh",
+        "versionPortal": "Portal"
+    },
+    "footer": {
+        "usesTestssl": "Este portal usa testssl.sh.",
+        "moreInfo": "Mais informação em"
+    },
+    "errors": {
+        "wrongHost": "Nome do anfitrião inválido.",
+        "wrongPort": "Número de porta inválido.",
+        "connectionFailed": "Ligação falhou.",
+        "confirmRequired": "Deve confirmar que está autorizado a analisar este sistema."
+    }
+}

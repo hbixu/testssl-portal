@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="{{ locale.split('-')[0] }}" data-theme="{{ theme }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ t.result.title }} — {{ t.common.appName }}</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+  <div class="layout">
+    {% include '_header.html' %}
+    <div class="status-bar running" id="statusBar">
+      <div>
+        <div class="target">{{ t.result.target }} <span>{{ target }}</span></div>
+        <div class="progress-wrap">
+          <div class="bar"></div>
+        </div>
+      </div>
+      <div class="status-bar-right">
+        <span class="badge badge-running">{{ t.result.statusRunning }}</span>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary status-bar-cancel" id="status-bar-cancel" target="_top">{{ t.result.cancelAndBack }}</a>
+      </div>
+    </div>
+    <div class="result-container">
+      <div class="result-toolbar">
+        <div class="left">
+          <span>{{ t.result.outputLabel }}</span>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn-copy" id="btn-copy" title="{{ t.result.copyResult }}" aria-label="{{ t.result.copyResult }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <div class="export-wrap custom-select-wrap export-select-wrap" data-select-id="export">
+            <select id="export-format" aria-label="{{ t.result.exportDropdown }}">
+              <option value="" selected>{{ t.result.exportDropdown }}</option>
+              <option value="txt">{{ t.result.exportText }}</option>
+              <option value="html">{{ t.result.exportHtml }}</option>
+            </select>
+            <button type="button" class="custom-select-trigger export-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="{{ t.result.exportDropdown }}"></button>
+            <div class="custom-select-dropdown" role="listbox" hidden></div>
+          </div>
+        </div>
+      </div>
+      <div class="result-body" id="result-body">
+        <p class="line-info" id="result-body-placeholder">{{ t.result.statusRunning }}</p>
+        <script>
+        (function(){
+          var el = document.getElementById('result-body');
+          if (!el) return;
+          var last = 0, throttle = 150;
+          function scrollToBottom() {
+            var now = Date.now();
+            if (now - last < throttle) return;
+            last = now;
+            el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+          }
+          var obs = new MutationObserver(scrollToBottom);
+          obs.observe(el, { childList: true, subtree: true });
+          scrollToBottom();
+        })();
+        </script>

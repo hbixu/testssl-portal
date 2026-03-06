@@ -88,6 +88,7 @@ COPY testssl.conf /etc/nginx/sites-enabled/default
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY uwsgi.ini /etc/uwsgi/
 COPY entrypoint.sh /
+RUN chmod +x /entrypoint.sh
 
 COPY --from=testssl-builder /testssl.sh /testssl.sh
 COPY --from=app-builder /app /testssl

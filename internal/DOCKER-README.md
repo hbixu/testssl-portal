@@ -63,6 +63,12 @@ services:
       - DEFAULT_LOCALE=en
       - BRANDING_LABEL=My SSL Portal
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 15s
+      retries: 3
 ```
 
 ## Ports

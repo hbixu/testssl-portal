@@ -1,0 +1,15 @@
+# Force LF line endings for shell scripts (required for Linux containers)
+*.sh text eol=lf
+
+# Force LF for other scripts that may run in containers
+entrypoint.sh text eol=lf
+healthcheck.sh text eol=lf
+
+# Keep Windows line endings for PowerShell scripts
+*.ps1 text eol=crlf
+
+# Docker files should use LF
+Dockerfile text eol=lf
+docker-compose.yml text eol=lf
+*.conf text eol=lf
+*.ini text eol=lf

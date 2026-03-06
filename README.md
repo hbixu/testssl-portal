@@ -59,11 +59,11 @@ chmod +x build.sh
 ./build.sh
 
 # Build with specific testssl.sh version
-./build.sh --version 1.0.0 --testssl-version v3.2.5
+./build.sh --version 1.0.0 --testssl-version v3.2.3
 
 # Multi-platform build and push to Docker Hub
 docker login
-./build.sh --version 1.0.0 --testssl-version 3.2 --registry docker.io/username --platform linux/amd64,linux/arm64 --push
+./build.sh --version 1.0.0 --testssl-version v3.2.3 --registry docker.io/username --platform linux/amd64,linux/arm64 --push
 ```
 
 ### Option 2: Direct Docker Build (Single Platform)
@@ -72,7 +72,7 @@ docker login
 docker build \
   --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
   --build-arg VERSION=1.0.0 \
-  --build-arg TESTSSL_VERSION=3.2 \
+  --build-arg TESTSSL_VERSION=v3.2.3 \
   -t testssl-portal:1.0.0 \
   .
 ```
@@ -90,7 +90,7 @@ docker buildx build \
   --platform linux/amd64,linux/arm64 \
   --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
   --build-arg VERSION=1.0.0 \
-  --build-arg TESTSSL_VERSION=3.2 \
+  --build-arg TESTSSL_VERSION=v3.2.3 \
   --tag username/testssl-portal:1.0.0 \
   --tag username/testssl-portal:latest \
   --push \
@@ -122,7 +122,7 @@ All environment variables are **optional**. Set them only to override the defaul
 | `VERSION` | Image version tag | `1.0.0` |
 | `BUILD_DATE` | Build timestamp (ISO 8601) | auto-generated |
 | `BASEIMAGE_VERSION` | Debian base image tag | `bookworm-20250224-slim` |
-| `TESTSSL_VERSION` | testssl.sh branch or tag to clone | `3.2` |
+| `TESTSSL_VERSION` | testssl.sh branch or tag to clone | `v3.2.3` |
 
 ### Quick Start
 

@@ -106,7 +106,7 @@ if ([string]::IsNullOrEmpty($CurrentBaseimage)) {
 }
 
 if ([string]::IsNullOrEmpty($CurrentTestssl)) {
-    $CurrentTestssl = "3.2"
+    $CurrentTestssl = "v3.2.3"
 }
 
 Write-Host "Current versions:"

@@ -67,7 +67,7 @@ if [[ -z "$CURRENT_BASEIMAGE" ]]; then
 fi
 
 if [[ -z "$CURRENT_TESTSSL" ]]; then
-    CURRENT_TESTSSL="3.2"
+    CURRENT_TESTSSL="v3.2.3"
 fi
 
 echo "Current versions:"

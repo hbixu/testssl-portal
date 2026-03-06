@@ -75,10 +75,10 @@ Examples:
     $0 --testssl-version v3.2.5
 
     # Build for linux/amd64 and linux/arm64 and push to Docker Hub (using env vars)
-    VERSION=1.0.0 TESTSSL_VERSION=3.2 $0 --registry docker.io/username --platform linux/amd64,linux/arm64 --push
+    VERSION=1.0.0 TESTSSL_VERSION=v3.2.3 $0 --registry docker.io/username --platform linux/amd64,linux/arm64 --push
 
     # Same with options instead of env vars
-    $0 --version 1.0.0 --testssl-version 3.2 --registry docker.io/username --platform linux/amd64,linux/arm64 --push
+    $0 --version 1.0.0 --testssl-version v3.2.3 --registry docker.io/username --platform linux/amd64,linux/arm64 --push
 
 Note: Default values can be changed at the top of this script.
 

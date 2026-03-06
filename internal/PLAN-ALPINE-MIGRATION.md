@@ -103,7 +103,7 @@ ARG BASEIMAGE_VERSION=3.21
 # ---- Builder: testssl.sh ----
 FROM alpine:${BASEIMAGE_VERSION} AS testssl-builder
 
-ARG TESTSSL_VERSION=3.2
+ARG TESTSSL_VERSION=v3.2.3
 
 RUN apk add --no-cache git ca-certificates \
     && git clone --depth 5 --branch="${TESTSSL_VERSION}" \
@@ -129,7 +129,7 @@ FROM alpine:${BASEIMAGE_VERSION}
 
 ARG BUILD_DATE
 ARG VERSION=1.0.0
-ARG TESTSSL_VERSION=3.2
+ARG TESTSSL_VERSION=v3.2.3
 ARG BASEIMAGE_VERSION
 
 ENV TESTSSL_VERSION=${TESTSSL_VERSION}

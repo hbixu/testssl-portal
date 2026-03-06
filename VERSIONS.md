@@ -10,8 +10,8 @@ The image uses OCI labels and build arguments for version tracking:
 |----------------|-------------|---------|
 | `VERSION` | Image version tag | `1.0.0` |
 | `BUILD_DATE` | Build timestamp (ISO 8601) | `2026-03-06T12:00:00Z` |
-| `BASEIMAGE_VERSION` | Debian base image tag | `bookworm-slim` |
-| `TESTSSL_VERSION` | testssl.sh branch or tag | `3.2` |
+| `BASEIMAGE_VERSION` | Debian base image tag | `bookworm-20250224-slim` |
+| `TESTSSL_VERSION` | testssl.sh branch or tag | `v3.2.3` |
 
 These are set as environment variables in the container:
 - `PORTAL_VERSION` — Image version
@@ -38,7 +38,7 @@ The following components are pinned at build time for reproducibility:
 
 | Release | Base Image | testssl.sh | Notes |
 |---------|------------|------------|-------|
-| 1.0.0 | debian:bookworm-slim | 3.2 | Initial release |
+| 1.0.0 | debian:bookworm-20250224-slim | v3.2.3 | Initial release |
 
 ## Application Versions
 
@@ -82,7 +82,7 @@ Default versions are defined in `build.sh`:
 ```bash
 DEFAULT_VERSION="1.0.0"
 DEFAULT_BASEIMAGE_VERSION="bookworm-20250224-slim"  # Pinned date tag
-DEFAULT_TESTSSL_VERSION="3.2"
+DEFAULT_TESTSSL_VERSION="v3.2.3"
 ```
 
 The base image is parametrized in `Dockerfile`:

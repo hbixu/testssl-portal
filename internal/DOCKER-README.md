@@ -18,7 +18,7 @@ Web portal for TLS/SSL server testing using testssl.sh. Features real-time strea
 
 | Image Tag | Base Image | testssl.sh |
 |-----------|------------|------------|
-| `1.0.0` | debian:bookworm-20250224-slim | 3.2 |
+| `1.0.0` | debian:bookworm-20250224-slim | v3.2.3 |
 
 ## Requirements
 

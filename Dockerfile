@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 # testssl-portal: testssl.sh + webfrontend (i18n, branding).
-# Build: docker build -f Dockerfile --build-arg TESTSSL_VERSION=3.2 -t testssl-portal .
+# Build: docker build -f Dockerfile --build-arg TESTSSL_VERSION=v3.2.3 -t testssl-portal .
 # Run:   docker run -d -p 5000:5000 -e BRANDING_LABEL="TLS/SSL Server Checker" testssl-portal
 
 # ==============================================================================
@@ -21,7 +21,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Check versions: curl -s https://api.github.com/repos/testssl/testssl.sh/releases/latest | grep tag_name
 # Branches: 3.0, 3.2, main (development)
 # ==============================================================================
-ARG TESTSSL_VERSION=3.2
+ARG TESTSSL_VERSION=v3.2.3
 
 RUN apt-get update -y && apt-get install -y --no-install-recommends git ca-certificates && rm -rf /var/lib/apt/lists/*
 
@@ -46,7 +46,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Image metadata ARGs
 ARG BUILD_DATE
 ARG VERSION=1.0.0
-ARG TESTSSL_VERSION=3.2
+ARG TESTSSL_VERSION=v3.2.3
 ARG BASEIMAGE_VERSION
 
 # Runtime environment

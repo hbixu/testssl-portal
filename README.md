@@ -1,51 +1,70 @@
 # testssl-portal
 
-Web portal to check servers’ TLS/SSL configuration using [testssl.sh](https://github.com/testssl/testssl.sh). The UI supports multiple languages (e.g. pt-PT, en), configurable branding, and dark/light theme.
+Web portal to check servers' TLS/SSL configuration using [testssl.sh](https://github.com/testssl/testssl.sh). The UI supports multiple languages (en, pt-PT), configurable branding, and dark/light themes. Results are streamed in real-time as the scan progresses.
 
-## Quick start
+## Features
 
-```bash
-docker build -t testssl-portal .
-docker run --rm -p 5000:5000 --name testssl-portal testssl-portal
+- ✅ Web-based interface for [testssl.sh](https://github.com/testssl/testssl.sh) TLS/SSL scanning
+- ✅ Real-time streaming output with ANSI color rendering via [aha](https://github.com/theZiz/aha)
+- ✅ Internationalization (i18n) support — English (en) and Portuguese (pt-PT) included
+- ✅ Customizable branding (logo, label, link)
+- ✅ Dark/light theme toggle with persistent preference
+- ✅ Multiple scan types: certificate only, normal (IDS-friendly), full
+- ✅ STARTTLS support for SMTP, IMAP, POP3, FTP, and other protocols
+- ✅ Multi-platform images: `linux/amd64` and `linux/arm64`
+- ✅ Based on [debian:bookworm-slim](https://hub.docker.com/_/debian)
+
+## Requirements
+
+- Docker 20.10+ (or Docker Desktop)
+- Docker Compose v2 (optional, for compose-based deployment)
+- No special capabilities or devices required
+- No host kernel requirements
+
+## File Structure
+
+```
+testssl-portal/
+├── Dockerfile              # Multi-stage build: testssl.sh + Flask webfrontend
+├── docker-compose.yml      # Docker Compose example
+├── build.sh                # Helper script for building images
+├── entrypoint.sh           # Container entrypoint (sets timeouts)
+├── supervisord.conf        # Process supervisor config (nginx + uWSGI)
+├── nginx.conf              # Nginx main configuration
+├── testssl.conf            # Nginx site config (upstream uWSGI)
+├── uwsgi.ini               # uWSGI app server configuration
+├── webfrontend/            # Flask application
+│   ├── SSLTestPortal.py    # Main Flask app
+│   ├── templates/          # Jinja2 HTML templates
+│   ├── static/             # CSS, JS, favicon
+│   └── locales/            # i18n translation files (*.json)
+├── VERSIONS.md             # Version control and component versions
+├── SECURITY.md             # Security and process execution details
+└── CHANGELOG.md            # Change history
 ```
 
-Open [http://localhost:5000](http://localhost:5000)
+## Build the Image
 
-### Docker Compose
+See [VERSIONS.md](VERSIONS.md) for available versions and how to check component versions.
 
-Example `docker-compose.yml`:
-
-```yaml
-services:
-  testssl-portal:
-    ports:
-      - "5000:5000"
-    # Optional: override defaults
-    environment:
-      - DEFAULT_LOCALE=pt-PT
-      # - BRANDING_LABEL=My SSL Portal
-      # - TEST_TIMEOUT=300
-```
-
-Run with:
-
-```bash
-docker compose up -d
-```
-
-## Build the image
-
-### Option 1: Helper script (Recommended)
+### Option 1: Helper Script (Recommended)
 
 ```bash
 chmod +x build.sh
 ./build.sh --help   # See all options
 
-# Build for linux/amd64 and linux/arm64 and push to Docker Hub repository
-VERSION=1.0.0 TESTSSL_REF=3.2 ./build.sh --push --registry docker.io/username
+# Local build (native platform)
+./build.sh
+
+# Build with specific testssl.sh version
+./build.sh --version 1.0.0 --testssl-ref v3.2.5
+
+# Multi-platform build and push to Docker Hub
+docker login
+./build.sh --version 1.0.0 --testssl-ref 3.2 --registry docker.io/username --platform linux/amd64,linux/arm64 --push
 ```
 
-### Option 2: Direct Docker build (single platform)
+### Option 2: Direct Docker Build (Single Platform)
 
 ```bash
 docker build \
@@ -56,11 +75,14 @@ docker build \
   .
 ```
 
-### Option 2b: Multi-platform build (amd64 + arm64)
+### Option 3: Multi-Platform Build with Push
 
 ```bash
-# Create and use a buildx builder (if not already created)
+# Create buildx builder (if not already created)
 docker buildx create --name multiplatform --use
+
+# Login to registry before push
+docker login
 
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
@@ -71,75 +93,170 @@ docker buildx build \
   --tag username/testssl-portal:latest \
   --push \
   .
-# Pushes both tags to Docker Hub (requires: docker login)
 ```
 
-Replace `username` with your Docker Hub username.
+## Configuration
 
-Build args: `TESTSSL_REF` is the [testssl/testssl.sh](https://github.com/testssl/testssl.sh) branch or tag (e.g. `3.2`, `v3.2.5`).
+### Environment Variables
 
-## Configuration (environment variables)
+All environment variables are **optional**. Set them only to override the defaults.
 
-All environment variables are **optional**. They only need to be set when you want to override the defaults below.
+| Variable | Required | Description | Default |
+|----------|----------|-------------|---------|
+| `UWSGI_PROCESSES` | No | Number of uWSGI worker processes (max parallel scans) | `4` |
+| `UWSGI_THREADS` | No | Threads per uWSGI process | `2` |
+| `TEST_TIMEOUT` | No | Scan timeout in seconds | `300` |
+| `TESTSSLDEBUG` | No | testssl.sh debug level (0–6) | `0` |
+| `BRANDING_LABEL` | No | Portal name shown in the header | `TLS/SSL Server Checker` |
+| `BRANDING_ICON_URL` | No | URL of the logo/icon (empty = default lock icon) | — |
+| `BRANDING_LINK` | No | URL when clicking the branding (empty = `/`) | — |
+| `DEFAULT_LOCALE` | No | Default UI language (`en`, `pt-PT`) | `en` |
+| `ENABLED_LOCALES` | No | Comma-separated list of enabled locales (e.g. `en,pt-PT` or `en`) | all available |
 
-### Concurrency and timeout
+### Build Arguments
 
+| Argument | Description | Default |
+|----------|-------------|---------|
+| `VERSION` | Image version tag | `1.0.0` |
+| `BUILD_DATE` | Build timestamp (ISO 8601) | auto-generated |
+| `TESTSSL_REF` | testssl.sh branch or tag to clone | `3.2` |
 
-| Variable          | Description                                                                                        | Default |
-| ----------------- | -------------------------------------------------------------------------------------------------- | ------- |
-| `UWSGI_PROCESSES` | Number of uWSGI processes (max parallel scans).                                                    | `4`     |
-| `UWSGI_THREADS`   | Threads per process.                                                                               | `2`     |
-| `TEST_TIMEOUT`    | Scan timeout in seconds. The entrypoint sets `CHECKTIMEOUT` from this so the app and nginx use it. | `300`   |
-| `TESTSSLDEBUG`    | testssl.sh debug level (0–6).                                                                      | `0`     |
-
-
-### Branding and locale
-
-**Available locales** (from `webfrontend/locales/*.json`): `pt-PT` (Português), `en` (English). To add more, see `webfrontend/locales/README.md`.
-
-
-| Variable            | Description                                                                                                                                                                                                      | Default                  |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `BRANDING_LABEL`    | Portal name in the header.                                                                                                                                                                                       | `TLS/SSL Server Checker` |
-| `BRANDING_ICON_URL` | URL of the logo/icon (empty = default lock icon).                                                                                                                                                                | —                        |
-| `BRANDING_LINK`     | URL when clicking the branding (empty = `/`).                                                                                                                                                                    | —                        |
-| `DEFAULT_LOCALE`    | Default UI language (must be one of the enabled locales).                                                                                                                                                        | `pt-PT`                  |
-| `ENABLED_LOCALES`   | Comma-separated list of locale codes to show in the selector (e.g. `pt-PT,en` or `en`). Only codes that have a `.json` file in `webfrontend/locales/` are accepted. If unset, all available locales are enabled. | all available            |
-
-
-Example:
+### Quick Start
 
 ```bash
+# Build
+docker build -t testssl-portal .
+
+# Run with defaults
+docker run --rm -p 5000:5000 testssl-portal
+
+# Run with custom branding and locale
 docker run --rm -p 5000:5000 \
   -e BRANDING_LABEL="My SSL Portal" \
-  -e BRANDING_ICON_URL="/static/logo.svg" \
   -e DEFAULT_LOCALE=en \
   testssl-portal
 ```
 
-## Behind a reverse proxy (e.g. Nginx)
+### Docker Compose
 
-Disable `proxy_buffering` so streaming output is visible during the scan:
+A ready-to-use `docker-compose.yml` is included in the repository:
+
+```bash
+docker compose up -d
+```
+
+See `docker-compose.yml` for configuration options.
+
+## Usage
+
+### Access the Web UI
+
+Open [http://localhost:5000](http://localhost:5000) in your browser.
+
+### Scan Types
+
+- **Certificate Only** — Quick scan of server certificate and chain
+- **Normal (IDS-friendly)** — Standard scan with IDS-friendly timing
+- **Full** — Complete testssl.sh scan (all checks)
+
+### STARTTLS Support
+
+Enable STARTTLS for protocols like SMTP, IMAP, POP3, FTP, XMPP, etc. Select the protocol from the dropdown when STARTTLS is enabled.
+
+### Check Container Status
+
+```bash
+# View logs
+docker logs testssl-portal
+
+# Check running processes
+docker exec testssl-portal ps aux
+```
+
+## How It Works
+
+1. **Initialization** — The entrypoint script sets `CHECKTIMEOUT` from `TEST_TIMEOUT` and configures nginx read timeout accordingly.
+
+2. **Process Management** — Supervisor starts and monitors two services:
+   - **nginx** — Reverse proxy on port 5000, serves static files and proxies to uWSGI
+   - **uWSGI** — Runs the Flask application with configured workers and threads
+
+3. **Scan Request** — When a user submits a scan:
+   - Form validation (host, port, scan type)
+   - Preflight TCP connection check
+   - testssl.sh execution with output piped through `aha` for ANSI-to-HTML conversion
+
+4. **Streaming Output** — Results are streamed in real-time via Server-Sent Events (SSE) or polling fallback, allowing users to see progress as the scan runs.
+
+5. **Graceful Shutdown** — On SIGTERM, supervisor sends QUIT to nginx and gracefully terminates uWSGI workers.
+
+## Troubleshooting
+
+### Connection Failed Error
+
+If you see "Connection failed" before the scan starts:
+
+1. Check if the port is correct (default 443 for HTTPS)
+2. For internal hosts, ensure the container can resolve and reach them
+3. Verify there are no firewall rules blocking outbound connections
+
+### Scan Timeout
+
+If scans timeout before completing:
+
+1. Increase the timeout:
+   ```bash
+   docker run -e TEST_TIMEOUT=600 -p 5000:5000 testssl-portal
+   ```
+
+2. Use a lighter scan type (Certificate Only) for slow targets
+
+### Streaming Output Not Updating
+
+If the output appears all at once instead of streaming:
+
+1. Check if you're behind a buffering reverse proxy
+2. Disable proxy buffering (see [Behind a Reverse Proxy](#behind-a-reverse-proxy))
+
+### Language Not Changing
+
+1. Clear browser cookies for the site
+2. Verify the locale file exists in `webfrontend/locales/`
+3. Check `ENABLED_LOCALES` if set
+
+## Behind a Reverse Proxy
+
+When running behind a reverse proxy (e.g., nginx, Traefik), disable buffering to ensure streaming output works:
 
 ```nginx
 location / {
     proxy_pass       http://localhost:5000;
     proxy_set_header Host       $host;
-    proxy_set_header X-Real-IP   $remote_addr;
+    proxy_set_header X-Real-IP  $remote_addr;
     proxy_buffering  off;
 }
 ```
 
-## Project structure
+## Security
 
-- **webfrontend/** — Flask app (templates, static assets, locales). Copied into the image at build time.
-- **Dockerfile** — Builds testssl.sh from the chosen ref and the webfrontend from the repo; no clone of an external webfrontend.
+The container runs multiple processes with different users for security. See [SECURITY.md](SECURITY.md) for detailed information about:
 
-## Credits
+- Process execution users (root, www-data)
+- Service architecture
+- Input validation and host blocking
 
-- [testssl.sh](https://github.com/testssl/testssl.sh) — TLS/SSL testing script (Dirk Wetter and contributors).
-- This portal uses Flask, nginx, uWSGI, and [aha](https://github.com/theZiz/aha) for ANSI-to-HTML output.
+**Summary:**
+- Supervisor runs as root (required for process management)
+- nginx and uWSGI run as `www-data` (non-root)
+- Input validation blocks localhost and private IP scans
+- No special capabilities or privileges required
 
 ## License
 
-See [LICENSE](LICENSE) in this repository.
+This project is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for details.
+
+## Credits
+
+- [testssl.sh](https://github.com/testssl/testssl.sh) — TLS/SSL testing tool (Dirk Wetter and contributors)
+- [aha](https://github.com/theZiz/aha) — ANSI to HTML converter
+- [Flask](https://flask.palletsprojects.com/) — Python web framework

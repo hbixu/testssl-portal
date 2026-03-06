@@ -1,0 +1,57 @@
+# Sync this repo to GitHub on push to main.
+# Pushes branch main and tags matching release-* to GitHub, excluding .gitea and internal/.
+#
+# Required in Gitea (Settings → Secrets and Variables):
+#   Secret:   SYNC_GITHUB_TOKEN  — GitHub Personal Access Token with repo scope
+#   Variable: SYNC_GITHUB_REPO  — GitHub repo as "owner/name" (e.g. myuser/testssl-portal)
+#   (Names cannot start with GITEA_ or GITHUB_)
+
+name: Sync to GitHub
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'release-*'
+
+jobs:
+  sync:
+    runs-on: docker-build
+    steps:
+      - name: Checkout repository
+        uses: https://github.com/actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "Gitea Sync"
+          git config user.email "sync@gitea.local"
+
+      - name: Remove .gitea and internal (do not sync to GitHub)
+        run: |
+          rm -rf .gitea internal
+          git add -A
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: exclude .gitea and internal from GitHub sync"
+          fi
+
+      - name: Push main to GitHub
+        env:
+          GH_URL: "https://x-access-token:${{ secrets.SYNC_GITHUB_TOKEN }}@github.com/${{ vars.SYNC_GITHUB_REPO }}.git"
+        run: |
+          git remote add github "$GH_URL" 2>/dev/null || git remote set-url github "$GH_URL"
+          git push --force github HEAD:main
+
+      - name: Push release-* tags to GitHub
+        env:
+          GH_URL: "https://x-access-token:${{ secrets.SYNC_GITHUB_TOKEN }}@github.com/${{ vars.SYNC_GITHUB_REPO }}.git"
+        run: |
+          git remote add github "$GH_URL" 2>/dev/null || git remote set-url github "$GH_URL"
+          tags=$(git tag -l 'release-*')
+          if [ -n "$tags" ]; then
+            for tag in $tags; do
+              git push github "$tag" || true
+            done
+          fi

@@ -1,0 +1,27 @@
+# testssl-portal Docker Compose example
+# Usage: docker compose up -d
+
+services:
+  testssl-portal:
+    image: testssl-portal:1.0.0
+    # build: .  # Uncomment to build from source
+    container_name: testssl-portal
+    ports:
+      - "5000:5000"
+    # volumes:
+    #   # Custom branding (optional): mount your logo file
+    #   - ./branding/logo.svg:/testssl/static/custom-logo.svg:ro
+    environment:
+      # UI language (en, pt-PT)
+      - DEFAULT_LOCALE=en
+      # Portal branding
+      # - BRANDING_LABEL=My SSL Portal
+      # - BRANDING_ICON_URL=/static/custom-logo.svg  # Use with volume above
+      # - BRANDING_ICON_URL=https://example.com/logo.png  # Or use external URL
+      # - BRANDING_LINK=https://example.com
+      # Scan timeout in seconds
+      # - TEST_TIMEOUT=300
+      # uWSGI concurrency
+      # - UWSGI_PROCESSES=4
+      # - UWSGI_THREADS=2
+    restart: unless-stopped

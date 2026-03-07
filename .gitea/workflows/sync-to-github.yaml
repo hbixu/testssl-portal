@@ -1,5 +1,5 @@
-# Sync this repo to GitHub on push to main.
-# Pushes branch main and tags matching release-* to GitHub, excluding .gitea and internal/.
+# Sync this repo to GitHub on push to main or on release tags (vMAJOR.MINOR.PATCH).
+# Pushes branch main and the release tag that triggered the run to GitHub, excluding .gitea and internal/.
 #
 # Required in Gitea (Settings → Secrets and Variables):
 #   Secret:   SYNC_GITHUB_TOKEN  — GitHub Personal Access Token with repo scope
@@ -13,7 +13,7 @@ on:
     branches:
       - main
     tags:
-      - 'v[0-9]+\\.[0-9]+\.[0-9]+$'
+      - 'v[0-9]+\.[0-9]+\.[0-9]+$'
 
 jobs:
   sync:
@@ -44,14 +44,11 @@ jobs:
           git remote add github "$GH_URL" 2>/dev/null || git remote set-url github "$GH_URL"
           git push --force github HEAD:main
 
-      - name: Push release-* tags to GitHub
+      - name: Push release tag to GitHub
+        if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_URL: "https://x-access-token:${{ secrets.SYNC_GITHUB_TOKEN }}@github.com/${{ vars.SYNC_GITHUB_REPO }}.git"
         run: |
           git remote add github "$GH_URL" 2>/dev/null || git remote set-url github "$GH_URL"
-          tags=$(git tag -l 'release-*')
-          if [ -n "$tags" ]; then
-            for tag in $tags; do
-              git push github "$tag" || true
-            done
-          fi
+          tag="${GITHUB_REF#refs/tags/}"
+          git push github "$tag" || true

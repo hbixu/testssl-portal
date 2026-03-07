@@ -1,5 +1,5 @@
-# Sync this repo to GitHub on push to main or on tags starting with v (e.g. v1.0.0, v1.0.0-beta).
-# Pushes branch main and the tag that triggered the run to GitHub, excluding .gitea and internal/.
+# Sync this repo to GitHub on push to main or on tags starting with v (v*).
+# Pushes branch main and all v* tags to GitHub, excluding .gitea and internal/.
 #
 # Required in Gitea (Settings → Secrets and Variables):
 #   Secret:   SYNC_GITHUB_TOKEN  — GitHub Personal Access Token with repo scope
@@ -44,11 +44,14 @@ jobs:
           git remote add github "$GH_URL" 2>/dev/null || git remote set-url github "$GH_URL"
           git push --force github HEAD:main
 
-      - name: Push tag to GitHub
-        if: gitea.ref_type == 'tag'
+      - name: Push v* tags to GitHub
         env:
           GH_URL: "https://x-access-token:${{ secrets.SYNC_GITHUB_TOKEN }}@github.com/${{ vars.SYNC_GITHUB_REPO }}.git"
-          TAG: ${{ gitea.ref_name }}
         run: |
           git remote add github "$GH_URL" 2>/dev/null || git remote set-url github "$GH_URL"
-          git push github "$TAG" || true
+          tags=$(git tag -l 'v*')
+          if [ -n "$tags" ]; then
+            for tag in $tags; do
+              git push github "$tag" || true
+            done
+          fi

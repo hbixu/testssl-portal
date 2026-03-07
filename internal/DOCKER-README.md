@@ -2,9 +2,7 @@
 
 Web portal for TLS/SSL server testing using testssl.sh. Features real-time streaming output, internationalization (en, pt-PT), customizable branding, and dark/light themes.
 
-[![Source](https://img.shields.io/badge/Source-GitHub-24292e?style=flat-square&logo=github)](https://github.com/hbixu/testssl-portal)
-[![linux/amd64](https://img.shields.io/badge/linux%2Famd64-0073ec?style=flat-square)](https://hub.docker.com/r/hbixu/testssl-portal/tags)
-[![linux/arm64](https://img.shields.io/badge/linux%2Farm64-28a745?style=flat-square)](https://hub.docker.com/r/hbixu/testssl-portal/tags)
+[![Source](https://img.shields.io/badge/source-GitHub-24292e?style=flat-square&logo=github)](https://github.com/hbixu/testssl-portal) ![linux/amd64](https://img.shields.io/badge/linux-amd64-0073ec?style=flat-square) ![linux/arm64](https://img.shields.io/badge/linux-arm64-28a745?style=flat-square)
 
 ## Features
 

@@ -263,3 +263,5 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
 - [testssl.sh](https://github.com/testssl/testssl.sh) — TLS/SSL testing tool (Dirk Wetter and contributors)
 - [aha](https://github.com/theZiz/aha) — ANSI to HTML converter
 - [Flask](https://flask.palletsprojects.com/) — Python web framework
+
+This portal’s UI was inspired by [testssl-web](https://github.com/shartge/testssl-web).
